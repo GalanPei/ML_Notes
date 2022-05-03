@@ -8,15 +8,6 @@ from d2l import torch as d2l
 
 
 d2l.use_svg_display()
-trans = transforms.ToTensor()
-mnist_train = torchvision.datasets.FashionMNIST(root="./data",
-                                                train=True,
-                                                transform=trans,
-                                                download=True)
-mnist_test = torchvision.datasets.FashionMNIST(root="./data",
-                                               train=False,
-                                               transform=trans,
-                                               download=True)
 
 
 def get_fashion_mnist_labels(labels):
@@ -42,3 +33,29 @@ def show_images(imgs, num_rows, num_cols, titles=None, scale=1.5):
         if titles:
             ax.set_title(titles[i])
     return axes
+
+
+def load_data_fashion_mnist(batch_size, resize=None):
+    """
+    下载fashion_MNIST数据集，并将其加入到内存中
+
+    :param batch_size:
+    :param resize:
+    :return:
+    """
+    trans = [transforms.ToTensor()]
+    if resize:
+        trans.insert(0, transforms.Resize(resize))
+    trans = transforms.Compose(trans)
+    mnist_train = torchvision.datasets.FashionMNIST(root="./data",
+                                                    train=True,
+                                                    transform=trans,
+                                                    download=True)
+    mnist_test = torchvision.datasets.FashionMNIST(root="./data",
+                                                   train=False,
+                                                   transform=trans,
+                                                   download=True)
+    return (data.DataLoader(mnist_train, batch_size, shuffle=True,
+                            num_workers=0),
+            data.DataLoader(mnist_test, batch_size, shuffle=False,
+                            num_workers=0))

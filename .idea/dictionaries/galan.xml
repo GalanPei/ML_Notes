@@ -2,6 +2,7 @@
   <dictionary name="galan">
     <words>
       <w>dataset</w>
+      <w>lstm</w>
       <w>perceptron</w>
       <w>softmax</w>
     </words>
