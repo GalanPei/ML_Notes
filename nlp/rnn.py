@@ -43,7 +43,8 @@ def initialize_LSTM_params(input_size: int, hidden_size: int):
     W_xi, W_hi, b_i = init_gate()  # Input gate
     W_xc, W_hc, b_c = init_gate()  # Cell gate
     W_xo, W_ho, b_o = init_gate()  # Output gate
-    W_hq, b_q = torch.randn((hidden_size, output_size)) * .1, torch.zeros(output_size)
+    W_hq, b_q = torch.randn((hidden_size, output_size)
+                            ) * .1, torch.zeros(output_size)
 
     params = [W_xf, W_hf, b_f,
               W_xi, W_hi, b_i,
@@ -113,30 +114,39 @@ def LSTM(inputs, state, params):
     return torch.cat(outputs, dim=0), (h_t, c_t)
 
 
-
-
-class RNNModelScratch(object):
+class RNNScratch(object):
     def __init__(self, vocab_size,
                  hidden_size,
                  get_params,
                  init_state,
                  forward_func):
-        self.input_size = vocab_size
+        self.vocab_size = vocab_size
+        self.hidden_size = hidden_size
+        self.params = get_params(vocab_size, hidden_size)
+        self.init_state = init_state
+        self.forward_func = forward_func
 
-    def __call__(self, X):
-        pass
+    def __call__(self, X, state):
+        X = F.one_hot(X.T, self.vocab_size).type(torch.float32)
+        return self.forward_func(X, state, self.params)
 
-    def begin_state(self):
-        pass
+    def begin_state(self, batch_size):
+        return self.init_state(batch_size, self.hidden_size)
 
 
 def grad_clipping(net, theta):
     """
     Do gradient clipping: $g <- min(1, theta / ||g||) * g)$
+
     :param net:
     :param theta:
     :return:
     """
     if isinstance(net, nn.Module):
-        # params = [param ]
-        pass
+        params = [p for p in net.parameters() if p.requires_grad_]
+    else:
+        params = net.params
+    norm = torch.norm(torch.tensor(params))
+    if norm > theta:
+        for param in params:
+            param.grad[:] *= theta / norm

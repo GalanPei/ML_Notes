@@ -34,7 +34,7 @@ class Perceptron(object):
 
     def plot_result(self, eta=0.1, max_iter=1000):
         if self.dim >= 4:
-            # 如果维度大于4，则无法画图
+            # If the dim of the data is more than 4, cannot plot
             raise Exception('Dimension should be less than 4!')
         w, b = self.train(eta, max_iter)
         if self.dim == 2:

@@ -19,31 +19,55 @@ def tokenize(lines, token='word'):
     elif token == 'char':
         return [list(line) for line in lines]
     else:
-        print('错误：未知令牌类型：' + token)
+        raise TypeError(f"Invalid token type: {token}")
 
 
-def tokens_frequency(tokens) -> dict:
+def trans_corpus(tokens: list) -> list:
     """
-    计算tokens列表中的token频率
+    Transfer the given list of tokens to a 1d list which only contains
+    simple tokens
 
-    :param tokens:
-    :return: token频率的哈希表
+    :param tokens: list of any dim which contains tokens
+    :return: token_list: 1d token list
     """
-    ret = dict()
-    if not tokens:
-        return ret
-    if isinstance(tokens[0], list):
-        tokens = [token for line in tokens for token in line]
-    return collections.Counter(tokens)
+    token_list = []
+    for token in tokens:
+        if isinstance(token, list):
+            # If the element of tokens is a list, we deploy the function
+            # with recursion
+            token_list += trans_corpus(token)
+        else:
+            token_list.append(token)
+    return token_list
 
 
 class Vocab(object):
-    def __init__(self, tokens, reserved_tokens = None):
+    def __init__(self, tokens, reserved_tokens: list = None, min_freq: int = 0) -> None:
+        """
+
+        :param tokens:
+        :param reserved_tokens:
+        :param min_freq:
+        """
         if tokens is None:
-            self.tokens = []
+            raise ValueError("The given token is empty!")
         else:
             self.tokens = tokens
-        pass
+        token_list = trans_corpus(tokens)
+        # Store the tokens by the frequency
+        token_freq_count = collections.Counter(token_list)
+        self.token_freq = sorted(token_freq_count.items(), key=lambda x: - x[1])
+        self.idx2token = ['<unk>'] + reserved_tokens
+        self.token2idx = dict()
+        for idx in range(len(self.idx2token)):
+            self.token2idx[self.idx2token[idx]] = idx
+        for token, freq in self.token_freq:
+            if freq < min_freq:
+                continue
+            self.idx2token.append(token)
+            self.token2idx[token] = idx + 1
+            idx += 1
+
 
     def __getitem__(self, item):
         pass
