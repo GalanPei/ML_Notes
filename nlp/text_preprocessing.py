@@ -68,9 +68,30 @@ class Vocab(object):
             self.token2idx[token] = idx + 1
             idx += 1
 
-
     def __getitem__(self, item):
-        pass
+        if isinstance(item, str):
+            return self.token2idx.get(item, self.unknown)
+        elif isinstance(item, (list, tuple)):
+            return [self.token2idx.get(x, self.unknown) for x in item]
+        else:
+            raise TypeError(f"The given token(s) should be either a list(tuple) or a string, "
+                            f"the given type is {type(item)}")
 
     def __len__(self):
-        pass
+        # Length of tokens
+        return len(self.idx2token)
+
+    @property
+    def token_frequency(self) -> dict:
+        # Catch the frequency of each token.
+        # If the token is not given, return 0.
+        _token_dict = collections.defaultdict(int)
+        for token, freq in self.token_freq:
+            _token_dict[token] = freq
+        return _token_dict
+
+    @property
+    def unknown(self) -> int:
+        # For the tokens which do not appear in the know list, we set
+        # the index as 0
+        return 0
