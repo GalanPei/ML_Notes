@@ -11,10 +11,11 @@ class Perceptron(object):
 
     def train(self, eta=0.1, max_iter=1000):
         """
-        感知机学习算法
-        :param eta: 梯度下降法学习率
-        :param max_iter: 最大迭代步数
-        :return: w, b 超平面系数
+        Train a simple Perceptron algorithm
+
+        :param eta: Learning rate of gradient descent
+        :param max_iter: Max iteration steps
+        :return: w, b the result of Hyper-parameters
         """
         w = np.zeros((1, self.dim))
         b = 0

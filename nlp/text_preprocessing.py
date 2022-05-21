@@ -1,6 +1,9 @@
 from d2l import torch as d2l
 import collections
 import re
+import torch
+import math
+import random
 
 
 def read_time_machine():
@@ -58,7 +61,7 @@ class Vocab(object):
         token_freq_count = collections.Counter(token_list)
         self.token_freq = sorted(token_freq_count.items(), key=lambda x: - x[1])
         self.idx2token = ['<unk>'] + reserved_tokens
-        self.token2idx = dict()
+        self.token2idx = collections.defaultdict(int)
         for idx in range(len(self.idx2token)):
             self.token2idx[self.idx2token[idx]] = idx
         for token, freq in self.token_freq:
@@ -69,6 +72,12 @@ class Vocab(object):
             idx += 1
 
     def __getitem__(self, item):
+        """
+        Get the index of token(s)
+
+        :param item: Given tokens. The type is either list/tuple or string
+        :return: list or int
+        """
         if isinstance(item, str):
             return self.token2idx.get(item, self.unknown)
         elif isinstance(item, (list, tuple)):
@@ -80,6 +89,18 @@ class Vocab(object):
     def __len__(self):
         # Length of tokens
         return len(self.idx2token)
+
+    def subsample(self, words, t: torch.float32 = 1e-4):
+        def prob(_freq: torch.float32):
+            return max(.0, 1 - math.sqrt(t / _freq))
+        if isinstance(words, str):
+            words = [words]
+        # Transfer the words to a flatten list
+        words = trans_corpus(words)
+        total_freq = sum([x[1] for x in self.token_freq])
+        return [word for word in words
+                if self.token2idx[word] != self.unknown and random.uniform(0, 1) < prob(
+                self.token_freq[word] / total_freq)]
 
     @property
     def token_frequency(self) -> dict:

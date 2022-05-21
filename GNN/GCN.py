@@ -10,3 +10,4 @@ class GCNBase(nn.Module):
         super().__init__()
 
     def forward(self):
+        pass
