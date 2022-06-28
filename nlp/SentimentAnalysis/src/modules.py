@@ -38,7 +38,7 @@ class TextCNN(nn.Module):
             self.convs.append(nn.Conv1d(2 * embed_size, channel, kernel))
         self.dropout = nn.Dropout(.5)
         self.decoder = nn.Linear(sum(channel_size), 2)
-        self.pool = nn.AdaptiveMaxPool1d()
+        self.pool = nn.AdaptiveMaxPool1d(1)
         self.relu = nn.ReLU()
 
     def forward(self, inputs):
