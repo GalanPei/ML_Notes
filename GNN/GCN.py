@@ -99,16 +99,22 @@ class GCNBase(nn.Module):
         :param A: Adjacent matrix
         :return:
         """
+
+        # Check out the input shape
         assert X.shape[0] == self.weight0[0], \
             "The shape of input data should be same as the weight matrix"
+        # Propagation of first layer:
+        #   X_1 = Relu(A * X * W_0)
         X = A @ X @ self.weight0
         if self.bias[0]:
             X += self.bias0
         X = self.relu(X)
         X = self.dropout(X)
+        # Propagation of second layer:
+        #   Z = softmax(A * X_1 * W_1)
         X = A @ X @ self.weight1
         if self.bias[1]:
             X += self.bias1
-        X = self.relu(X)
-        X = self.dropout(X)
-        return X
+        Z = self.relu(X)
+        Z = self.dropout(Z)
+        return Z
