@@ -9,7 +9,7 @@ class GraphSAGE(nn.Module):
     def __init__(self,
                  inputs: torch.Tensor,
                  depth: int,
-                 weight: torch.Tensor,
+                 hidden_size: int,
                  neighborhood_fun,
                  activation=F.relu,
                  aggregator_type: str = "mean"):
@@ -20,8 +20,8 @@ class GraphSAGE(nn.Module):
             where V is the number of total nodes
         :param depth(int):
             The depth of graph sampling and aggregating
-        :param weight(:class:`torch.Tensor`):
-            Weight matrix for each layer
+        :param hidden_size(int):
+            The size of weight matrix
         :param neighborhood_fun:
             The neighborhood function for each node. The input is the index of
             one node, and the return value of this function is the list of the
@@ -33,9 +33,11 @@ class GraphSAGE(nn.Module):
         """
         super(GraphSAGE, self).__init__()
         self.inputs = inputs
+        self.K_hidden = [inputs for _ in range(depth)]
         self.V = inputs.shape[0]
         self.depth = depth
-        self.weight = weight
+        weight = [torch.empty(size=(hidden_size, hidden_size)) for _ in range(self.depth)]
+        self.weight = [nn.Parameter(nn.init.xavier_normal_(w)) for w in weight]
         self.activation = activation
         self.neighborhood_fun = neighborhood_fun
         if aggregator_type == "Mean":
@@ -49,27 +51,40 @@ class GraphSAGE(nn.Module):
 
     def forward(self):
         """
-        Forward propagation of GraphSAGE
+        Forward propagation of GraphSAGE for the total graph
 
         :return:
         """
-        for idx in range(self.V):
-            h0 = self.inputs[idx]
-            for i in range(self.depth):
-                for j in range(self.V):
-                    pass
+        Z = self.inputs
+        for node in range(self.V):
+            Z = self.propagation(node)
+        return Z
 
-    def graph_conv(self, input_node: int, node_features: torch.Tensor, k: int):
+    def propagation(self, node: int):
+        """
+        Forward propagation for one single node.
+
+        :param node:
+        :return:
+        """
+        z = self.inputs[node]
+        for i in range(1, self.depth + 1):
+            z = self.graph_conv(node, i)
+        return z
+
+    def graph_conv(self, node: int, k: int):
         """
         Graph convolution operation of one node
 
-        :param input_node: Index of
-        :param node_features:
-        :param k:
-        :return:
+        :param node: Index of the given node
+        :param k: The layer
+        :return new_node_feature: Hidden feature of input node
         """
-        neighbour_node = self.neighborhood_fun(input_node)
-        h_neighbour = self.aggregator([node_features[i] for i in neighbour_node])
+        neighbour_list = self.neighborhood_fun(node)  # Get the neighborhood nodes
+        aggregate = self.aggregator([self.K_hidden[k - 1][i] for i in neighbour_list])
+        h_neighbour = aggregate()
         new_node_feature = self.activation(
-            self.weight[k] @ torch.concat([node_features[input_node], h_neighbour]))
+            self.weight[k] @ torch.concat([self.K_hidden[k - 1][node], h_neighbour]))
+        new_node_feature /= torch.norm(new_node_feature, p=2)
+        self.K_hidden[k][node] = new_node_feature
         return new_node_feature
