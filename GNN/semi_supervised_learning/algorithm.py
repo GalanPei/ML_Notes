@@ -124,10 +124,10 @@ class LPA(object):
         else:
             return vec_label, full_label
 
-    def labelPropOri(self, 
-                     epsilon, 
-                     weight_fun=gaussian_weight, 
-                     max_iteration: int = 1e4, 
+    def labelPropOri(self,
+                     epsilon,
+                     weight_fun=gaussian_weight,
+                     max_iteration: int = 1e4,
                      tol: float = 1e-5):
         """
         Label Propagation Algorithm for binary classification
@@ -202,19 +202,19 @@ class LPA(object):
         colors = list(mcolors.TABLEAU_COLORS.keys())
         # Plot the unlabeled nodes as hollow circles
         for i in range(self.num_sample):
-            plt.plot(self.unlabeled_data[i, 0], 
-                     self.unlabeled_data[i, 1], 
-                     linewidth=0.1, 
-                     marker='o', 
+            plt.plot(self.unlabeled_data[i, 0],
+                     self.unlabeled_data[i, 1],
+                     linewidth=0.1,
+                     marker='o',
                      markersize=2,
                      color=mcolors.TABLEAU_COLORS[colors[int(f_u[i])]], markerfacecolor='white')
         # Plot the labeled nodes as filled triangles
         for i in range(self.num_labeled):
-            plt.plot(self.labeled_data[i, 0], 
-                     self.labeled_data[i, 1], 
-                     '^', 
+            plt.plot(self.labeled_data[i, 0],
+                     self.labeled_data[i, 1],
+                     '^',
                      markersize=8,
-                     color='black', 
+                     color='black',
                      markerfacecolor=mcolors.TABLEAU_COLORS[colors[int(f_l[i])]])
         # plt.xlabel(r'$x_1$', fontsize=14)
         # plt.ylabel(r'$x_2$', fontsize=14)
