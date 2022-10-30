@@ -28,6 +28,7 @@ class Accumulator(object):
     Accumulator 实例中创建了 2 个变量，用于分别存储正确预测的数量和预测的总数量.
     在`n`个变量上累加。
     """
+
     def __init__(self, n):
         self.data = [0.0] * n
 
@@ -113,6 +114,7 @@ def train_epoch_ch3(net, train_iter, loss, updater):
 
 class Animator(object):
     """在动画中绘制数据。"""
+
     def __init__(self, xlabel=None, ylabel=None, legend=None, xlim=None,
                  ylim=None, xscale='linear', yscale='linear',
                  fmts=('-', 'm--', 'g-.', 'r:'), nrows=1, ncols=1,
@@ -122,7 +124,7 @@ class Animator(object):
         # d2l.use_svg_display()
         self.fig, self.axes = d2l.plt.subplots(nrows, ncols, figsize=figsize)
         if nrows * ncols == 1:
-            self.axes = [self.axes,]
+            self.axes = [self.axes, ]
         self.config_axes = lambda: d2l.set_axes(self.axes[
             0], xlabel, ylabel, xlim, ylim, xscale, yscale, legend)
         self.X, self.Y, self.fmts = None, None, fmts

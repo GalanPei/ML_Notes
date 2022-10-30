@@ -93,10 +93,10 @@ class ROC(object):
 
 
 if __name__ == "__main__":
-    predict = [0.9, 0.8, 0.7, 0.6, 0.55, 0.54, 0.53, 0.52, 0.51,
-               0.505, 0.4, 0.39, 0.38, 0.37, 0.36, 0.35, 0.34, 0.33, 0.3, 0.1]
-    ground_truth = [1, 1, 0, 1, 1, 1, 0, 0, 1, 0, 1, 0, 1, 0, 0, 0, 1, 0, 1, 0]
-    roc = ROC(label=ground_truth, value=predict)
+    dim_num = 100
+    predict = np.random.rand(dim_num)
+    ground_truth = np.where(np.random.rand(dim_num) > .5, 1, 0)
+    roc = ROC(label=ground_truth, value=predict, pos_label=1)
     roc.ROC_curve()
 
     fpr, tpr, thresholds = roc_curve(
