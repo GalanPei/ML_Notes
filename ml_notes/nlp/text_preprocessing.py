@@ -1,9 +1,32 @@
+from typing import Type
 from d2l import torch as d2l
 import collections
 import re
 import torch
 import math
 import random
+
+
+class TextSet(object):
+    def __init__(self, file_name=None, file_url=None) -> None:
+        if not file_name and not file_url:
+            raise ValueError("You should give a file name or file url")
+        self.lines = []
+        self.token_lines = []
+        if file_name:
+            with open(file_name, mode='r', encoding='utf-8') as f:
+                lines = f.readlines()
+            self.lines = [re.sub('[^A-Za-z]+', ' ', line).strip().lower()
+                          for line in lines]
+            
+    def tokenize(self, type="word"):
+        if type == "word":
+            self.token_lines = [line.split() for line in self.lines]
+        elif type == "char":
+            self.token_lines = [list(line) for line in self.lines]
+        else:
+            raise TypeError(f"Invalid type: {type}.")
+            
 
 
 def read_time_machine():
@@ -59,7 +82,8 @@ class Vocab(object):
         token_list = trans_corpus(tokens)
         # Store the tokens by the frequency
         token_freq_count = collections.Counter(token_list)
-        self.token_freq = sorted(token_freq_count.items(), key=lambda x: - x[1])
+        self.token_freq = sorted(
+            token_freq_count.items(), key=lambda x: - x[1])
         self.idx2token = ['<unk>'] + reserved_tokens
         self.token2idx = collections.defaultdict(int)
         for idx in range(len(self.idx2token)):
@@ -100,7 +124,7 @@ class Vocab(object):
         total_freq = sum([x[1] for x in self.token_freq])
         return [word for word in words
                 if self.token2idx[word] != self.unknown and random.uniform(0, 1) < prob(
-                self.token_freq[word] / total_freq)]
+                    self.token_freq[word] / total_freq)]
 
     @property
     def token_frequency(self) -> dict:
